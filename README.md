@@ -1,130 +1,62 @@
-# CompLens | Compensation Intelligence Platform
+# CompLens: Compensation Intelligence Platform
 
-CompLens is a full-stack, production-grade compensation intelligence platform inspired by Levels.fyi. It provides transparency into tech salaries across companies, roles, and locations.
+CompLens is a production-grade, full-stack compensation intelligence platform inspired by Levels.fyi. It enables users to explore verified salary data, visualize company-specific compensation trends, and perform head-to-head comparisons between roles.
 
-## 🚀 Tech Stack
+## 🏗️ Architecture Explanation
 
-- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Components**: [shadcn/ui](https://ui.shadcn.com/)
-- **ORM**: [Prisma](https://www.prisma.io/)
-- **Database**: PostgreSQL
-- **Validation**: [Zod](https://zod.dev/)
+CompLens follows a **Backend-Focused, Service-Oriented Architecture** built on the Next.js 15 App Router.
 
-## ✨ Key Features
+- **Frontend**: React 19 + Tailwind CSS + shadcn/ui. Highly responsive and accessible components.
+- **Backend**: API-first design using Next.js Route Handlers. Logic is decoupled into a centralized **Service Layer** (`src/services/`).
+- **Data Layer**: PostgreSQL database managed via **Prisma ORM**. Optimized with indexes for fast searching and filtering.
+- **Validation**: Strict schema enforcement using **Zod** across both API ingestion and query parameters.
+- **Reliability**: Centralized error handling wrapper for APIs and global frontend error boundaries.
 
-- **Backend-Focused Architecture**: Clean separation of concerns with a dedicated service layer.
-- **API-First Design**: Robust API endpoints with server-side filtering and pagination.
-- **Modern UI/UX**: Premium, responsive dashboard with a clean aesthetic.
-- **Advanced Filtering**: Filter by company, role, location, total compensation, and experience.
-- **Salaries Exploration Page**: Dedicated `/salaries` page with real-time filtering, search, and pagination.
-- **Company Detail Page**: Dynamic `/company/[name]` page with Recharts visualizations for level-based compensation distribution.
-- **Comparison Tool**: Head-to-head analysis page for comparing specific salary entries with percentage difference metrics.
-- **Robust Validation**: Zod-powered validation with automatic string normalization, trimming, and strict range checks.
-- **Global Error Handling**: Centralized API error management and frontend error boundaries for maximum stability.
-- **Safe API Responses**: Standardized JSON error formats that protect sensitive system information in production.
-- **Production Grade**: Structured for scalability and high reliability.
+## 📡 API Documentation
 
-## 📁 Project Structure
+### Salaries API
+- `GET /api/salaries`: Search and filter compensation data.
+  - Params: `search`, `company`, `role`, `location`, `minTotalComp`, `maxTotalComp`, `sortBy`, `page`.
+- `POST /api/ingest-salary`: Submit new data. Includes duplicate rejection and automatic normalization.
 
-```text
-src/
-├── app/            # Next.js pages and API routes
-├── components/     # UI components (Layout, Salary, shadcn/ui)
-├── lib/            # Shared utilities and Prisma client singleton
-├── prisma/         # Database schema and seed scripts
-├── services/       # Business logic and data access layer
-├── types/          # TypeScript definitions and interfaces
-├── validators/     # Zod schemas for request validation
-```
+### Company API
+- `GET /api/company/[name]`: Aggregated insights for a specific company.
+  - Returns: Median TC, Level Distribution (via Prisma `groupBy`), and recent entries.
 
-## 🛠️ Getting Started
+### Comparison API
+- `GET /api/compare`: Head-to-head analysis between two entries.
+  - Params: `id1`, `id2`.
+  - Returns: Absolute and percentage differences across base, bonus, stock, and TC.
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/Neha91-svg/Compensation-Intelligence-Platform
-cd Compensation-Intelligence-Platform
-```
+## 🚀 Setup & Deployment Guide
 
-### 2. Install dependencies
-```bash
-npm install
-```
+### Local Development
+1. **Clone the repo**
+2. **Install dependencies**: `npm install`
+3. **Environment**: Copy `.env.example` to `.env` and provide a PostgreSQL URL.
+4. **Database Migration**: `npx prisma migrate dev`
+5. **Seed Data**: `npm run prisma:seed`
+6. **Start Dev Server**: `npm run dev`
 
-### 3. Setup Environment
-Copy the example environment file and update your PostgreSQL connection string:
-```bash
-cp .env.example .env
-```
+### Deployment (Vercel + Neon)
+1. **Database**: Create a project on [Neon.tech](https://neon.tech) and copy the Connection String.
+2. **Vercel**:
+   - Push code to GitHub.
+   - Import project in Vercel.
+   - Add `DATABASE_URL` to Vercel Environment Variables.
+   - Deploy. Vercel will automatically run `npm run build` which includes `prisma generate`.
+3. **Initialization**: Run `npx prisma db push` or `migrate deploy` from your local machine targeting the Neon URL to set up the schema.
 
-### 4. Initialize Database
-```bash
-npx prisma generate
-npx prisma migrate dev --name init
-npx prisma db seed
-```
+## 🛠️ Tech Stack
+- **Framework**: Next.js 15 (App Router, Server Components)
+- **Database**: PostgreSQL (Neon / Supabase ready)
+- **ORM**: Prisma
+- **Validation**: Zod
+- **UI**: shadcn/ui + Tailwind CSS
+- **Visualization**: Recharts
 
-### 5. Run the development server
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## 📡 API Endpoints
-
-### `GET /api/salaries`
-Retrieve compensation data with advanced filtering and search.
-- **Search**: `search` (Global search across company and role)
-- **Filters**: `company`, `role`, `level`, `location`, `minTotalComp`, `maxTotalComp`, `experienceYears`
-- **Sorting**: `sortBy` (`totalCompensation`, `experienceYears`, `createdAt`), `sortOrder` (`asc`, `desc`)
-- **Pagination**: `page`, `limit` (max 100)
-
-### `POST /api/ingest-salary`
-Submit new compensation data.
-- **Features**: Automatic normalization, total compensation calculation, and duplicate rejection.
-- **Body**:
-  ```json
-  {
-    "company": "Google",
-    "role": "Software Engineer",
-    "location": "Mountain View, CA",
-    "experienceYears": 2,
-    "baseSalary": 150000,
-    "bonus": 20000,
-    "stock": 40000
-  }
-  ```
-
-### `GET /api/company/[company]`
-Retrieve aggregated insights for a specific company.
-- **Returns**: Median compensation, level distribution, and recent salary listings.
-- **Normalization**: Automatically matches normalized company names regardless of URL casing.
-
-### `GET /api/compare`
-Perform a head-to-head comparison between two salary entries.
-- **Query Params**: `id1`, `id2` (IDs of the entries to compare)
-- **Returns**: Absolute and percentage differences across all financial metrics, plus level comparisons.
-
-## 📊 Database Schema
-
-The core `Salary` model includes:
-- `company`, `role`, `level`, `location`
-- `experienceYears`
-- `baseSalary`, `bonus`, `stock`
-- `totalCompensation` (Calculated)
-- `confidenceScore`
-- Timestamps and Indexes for performance
-
-## 🛣️ Roadmap
-
-- [ ] User Authentication (NextAuth.js)
-- [ ] Interactive Salary Trend Charts (Recharts)
-- [ ] Community Forums & Benefits Discussion
-- [ ] Company-specific Salary Distribution pages
-- [ ] AI-powered Salary Negotiation Insights
-
-## 📄 License
-
-This project is licensed under the MIT License.
+## 📊 Key Features
+- **Salaries Database**: Advanced filtering, search, and pagination.
+- **Company Insights**: Visualized level distribution charts.
+- **Head-to-Head Compare**: Automated delta calculations for role comparisons.
+- **Production Reliable**: Global error boundaries and sanitized API responses.
