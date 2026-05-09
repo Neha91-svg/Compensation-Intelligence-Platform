@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SalaryService } from "@/services/salaryService";
 import { salaryQuerySchema, salaryCreateSchema } from "@/validators/salary";
-import { ZodError } from "zod";
+import { handleApiError, getSafeBody } from "@/lib/api-error";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await getSafeBody(request);
     const validatedData = salaryCreateSchema.parse(body);
     const result = await SalaryService.createSalary(validatedData);
     
@@ -27,22 +27,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleApiError(error);
   }
-}
-
-/**
- * Common error handler for structured validation errors
- */
-function handleApiError(error: unknown) {
-  if (error instanceof ZodError) {
-    return NextResponse.json({
-      error: "Validation failed",
-      details: error.flatten().fieldErrors,
-    }, { status: 400 });
-  }
-
-  console.error("API Error:", error);
-  return NextResponse.json({ 
-    error: "Internal Server Error",
-    message: error instanceof Error ? error.message : "Unknown error"
-  }, { status: 500 });
 }

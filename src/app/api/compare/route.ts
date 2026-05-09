@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SalaryService } from "@/services/salaryService";
 import { z } from "zod";
+import { handleApiError, ApiError } from "@/lib/api-error";
 
 const compareQuerySchema = z.object({
   id1: z.string().min(1, "First salary ID is required"),
@@ -9,7 +10,6 @@ const compareQuerySchema = z.object({
 
 /**
  * GET /api/compare
- * Compares two salary entries by ID
  */
 export async function GET(request: NextRequest) {
   try {
@@ -25,24 +25,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result);
 
   } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: "Validation Error",
-        details: error.flatten().fieldErrors,
-      }, { status: 400 });
+    // Map service errors to ApiErrors for standard handling
+    if (error instanceof Error && error.message.includes("not found")) {
+      return handleApiError(new ApiError(404, error.message));
     }
-
-    if (error.message && error.message.includes("not found")) {
-      return NextResponse.json({
-        error: "Not Found",
-        message: error.message
-      }, { status: 404 });
-    }
-
-    console.error("Comparison API Error:", error);
-    return NextResponse.json({ 
-      error: "Internal Server Error",
-      message: error instanceof Error ? error.message : "An unexpected error occurred"
-    }, { status: 500 });
+    
+    return handleApiError(error);
   }
 }
