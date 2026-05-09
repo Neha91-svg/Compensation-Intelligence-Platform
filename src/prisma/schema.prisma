@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  industry    String?
+  website     String?
+  logoUrl     String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  salaries    Salary[]
+}
+
+model Salary {
+  id              String   @id @default(cuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id])
+  jobTitle        String
+  level           String?  // e.g., L3, Senior, etc.
+  baseSalary      Float
+  bonus           Float?
+  stock           Float?   // Total Stock Value (usually over 4 years)
+  location        String
+  yearsExperience Int
+  yearsAtCompany  Int?
+  employmentType  String   @default("Full-time") // Full-time, Contract, etc.
+  currency        String   @default("USD")
+  verified        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([jobTitle])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
