@@ -54,12 +54,16 @@ export const salaryCreateSchema = z.object({
 
 // Search Query Validator
 export const salaryQuerySchema = z.object({
+  search: z.string().trim().optional(),
   company: z.string().trim().optional(),
   role: z.string().trim().optional(),
+  level: z.string().trim().optional(),
   location: z.string().trim().optional(),
   minTotalComp: z.coerce.number().nonnegative().optional(),
   maxTotalComp: z.coerce.number().nonnegative().optional(),
   experienceYears: z.coerce.number().nonnegative().optional(),
+  sortBy: z.enum(["totalCompensation", "experienceYears", "createdAt"]).default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
 });

@@ -2,38 +2,50 @@ import prisma from "@/lib/prisma";
 import { SalaryQuery } from "@/validators/salary";
 
 export class SalaryService {
-  static async getSalaries(query: SalaryQuery) {
-    const { company, role, location, minTotalComp, maxTotalComp, experienceYears, page, limit } = query;
+  static async getSalaries(query: any) {
+    const { 
+      search, company, role, level, location, 
+      minTotalComp, maxTotalComp, experienceYears, 
+      sortBy, sortOrder, page, limit 
+    } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: any = { AND: [] };
 
-    if (company) {
-      where.company = { contains: company, mode: "insensitive" };
+    // Search across company and role
+    if (search) {
+      where.AND.push({
+        OR: [
+          { company: { contains: search, mode: "insensitive" } },
+          { role: { contains: search, mode: "insensitive" } },
+        ],
+      });
     }
 
-    if (role) {
-      where.role = { contains: role, mode: "insensitive" };
-    }
-
-    if (location) {
-      where.location = { contains: location, mode: "insensitive" };
-    }
+    // Specific Filters
+    if (company) where.AND.push({ company: { contains: company, mode: "insensitive" } });
+    if (role) where.AND.push({ role: { contains: role, mode: "insensitive" } });
+    if (level) where.AND.push({ level: { contains: level, mode: "insensitive" } });
+    if (location) where.AND.push({ location: { contains: location, mode: "insensitive" } });
 
     if (minTotalComp || maxTotalComp) {
-      where.totalCompensation = {};
-      if (minTotalComp) where.totalCompensation.gte = minTotalComp;
-      if (maxTotalComp) where.totalCompensation.lte = maxTotalComp;
+      const tc: any = {};
+      if (minTotalComp) tc.gte = minTotalComp;
+      if (maxTotalComp) tc.lte = maxTotalComp;
+      where.AND.push({ totalCompensation: tc });
     }
 
     if (experienceYears !== undefined) {
-      where.experienceYears = { gte: experienceYears };
+      where.AND.push({ experienceYears: { gte: experienceYears } });
     }
+
+    // Optimization: If AND is empty, remove it to simplify query
+    if (where.AND.length === 0) delete where.AND;
 
     const [salaries, total] = await Promise.all([
       prisma.salary.findMany({
         where,
-        orderBy: { createdAt: "desc" },
+        orderBy: { [sortBy]: sortOrder },
         skip,
         take: limit,
       }),

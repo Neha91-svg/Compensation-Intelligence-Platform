@@ -71,8 +71,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## 📡 API Endpoints
 
 ### `GET /api/salaries`
-Retrieve compensation data with server-side filtering.
-- **Query Params**: `company`, `role`, `location`, `minTotalComp`, `maxTotalComp`, `experienceYears`, `page`, `limit`
+Retrieve compensation data with advanced filtering and search.
+- **Search**: `search` (Global search across company and role)
+- **Filters**: `company`, `role`, `level`, `location`, `minTotalComp`, `maxTotalComp`, `experienceYears`
+- **Sorting**: `sortBy` (`totalCompensation`, `experienceYears`, `createdAt`), `sortOrder` (`asc`, `desc`)
+- **Pagination**: `page`, `limit` (max 100)
 
 ### `POST /api/ingest-salary`
 Submit new compensation data.
