@@ -20,6 +20,7 @@ CompLens is a full-stack, production-grade compensation intelligence platform in
 - **Advanced Filtering**: Filter by company, role, location, total compensation, and experience.
 - **Salaries Exploration Page**: Dedicated `/salaries` page with real-time filtering, search, and pagination.
 - **Company Detail Page**: Dynamic `/company/[name]` page with Recharts visualizations for level-based compensation distribution.
+- **Comparison Tool**: Head-to-head analysis page for comparing specific salary entries with percentage difference metrics.
 - **Robust Validation**: Zod-powered validation with automatic string normalization, trimming, and strict range checks.
 - **Structured Error Handling**: API returns detailed, field-specific validation errors.
 - **Production Grade**: Structured for scalability and maintainability.

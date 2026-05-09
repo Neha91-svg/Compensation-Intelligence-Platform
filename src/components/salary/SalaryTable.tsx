@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 interface SalaryTableProps {
   salaries: any[];
@@ -33,12 +34,13 @@ export function SalaryTable({ salaries }: SalaryTableProps) {
                 <TableHead className="font-semibold">Location</TableHead>
                 <TableHead className="font-semibold text-center">Exp.</TableHead>
                 <TableHead className="font-semibold text-center">Score</TableHead>
+                <TableHead className="font-semibold text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {salaries.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10 text-slate-500">
+                  <TableCell colSpan={8} className="text-center py-10 text-slate-500">
                     No salary data found.
                   </TableCell>
                 </TableRow>
@@ -46,7 +48,9 @@ export function SalaryTable({ salaries }: SalaryTableProps) {
                 salaries.map((salary) => (
                   <TableRow key={salary.id} className="hover:bg-slate-50/50 transition-colors">
                     <TableCell className="font-medium text-slate-900">
-                      {salary.company}
+                      <Link href={`/company/${salary.company}`} className="hover:text-indigo-600">
+                        {salary.company}
+                      </Link>
                     </TableCell>
                     <TableCell className="text-slate-600">{salary.role}</TableCell>
                     <TableCell>
@@ -63,6 +67,14 @@ export function SalaryTable({ salaries }: SalaryTableProps) {
                       <div className="flex justify-center">
                         <div className={`h-2 w-2 rounded-full ${salary.confidenceScore > 0.9 ? 'bg-green-500' : 'bg-yellow-500'}`} title={`Confidence: ${(salary.confidenceScore * 100).toFixed(0)}%`} />
                       </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link 
+                        href={`/compare?id1=${salary.id}`} 
+                        className="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-full transition-colors"
+                      >
+                        Compare
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))
