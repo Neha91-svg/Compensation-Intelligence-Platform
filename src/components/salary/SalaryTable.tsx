@@ -31,13 +31,14 @@ export function SalaryTable({ salaries }: SalaryTableProps) {
                 <TableHead className="font-semibold">Level</TableHead>
                 <TableHead className="font-semibold text-right">Total Comp</TableHead>
                 <TableHead className="font-semibold">Location</TableHead>
-                <TableHead className="font-semibold">Exp.</TableHead>
+                <TableHead className="font-semibold text-center">Exp.</TableHead>
+                <TableHead className="font-semibold text-center">Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {salaries.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-slate-500">
+                  <TableCell colSpan={7} className="text-center py-10 text-slate-500">
                     No salary data found.
                   </TableCell>
                 </TableRow>
@@ -45,19 +46,24 @@ export function SalaryTable({ salaries }: SalaryTableProps) {
                 salaries.map((salary) => (
                   <TableRow key={salary.id} className="hover:bg-slate-50/50 transition-colors">
                     <TableCell className="font-medium text-slate-900">
-                      {salary.company.name}
+                      {salary.company}
                     </TableCell>
-                    <TableCell className="text-slate-600">{salary.jobTitle}</TableCell>
+                    <TableCell className="text-slate-600">{salary.role}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="font-normal border-slate-200 bg-white">
                         {salary.level || "N/A"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-bold text-indigo-600">
-                      ${((salary.baseSalary + (salary.bonus || 0) + (salary.stock || 0)) / 1000).toFixed(0)}k
+                      ${(salary.totalCompensation / 1000).toFixed(0)}k
                     </TableCell>
                     <TableCell className="text-slate-500 text-sm">{salary.location}</TableCell>
-                    <TableCell className="text-slate-500 text-sm">{salary.yearsExperience}y</TableCell>
+                    <TableCell className="text-center text-slate-500 text-sm">{salary.experienceYears}y</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center">
+                        <div className={`h-2 w-2 rounded-full ${salary.confidenceScore > 0.9 ? 'bg-green-500' : 'bg-yellow-500'}`} title={`Confidence: ${(salary.confidenceScore * 100).toFixed(0)}%`} />
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               )}

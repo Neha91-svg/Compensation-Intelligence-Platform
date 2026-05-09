@@ -3,39 +3,36 @@ import { SalaryQuery } from "@/validators/salary";
 
 export class SalaryService {
   static async getSalaries(query: SalaryQuery) {
-    const { company, jobTitle, location, minBaseSalary, maxBaseSalary, yearsExperience, page, limit } = query;
+    const { company, role, location, minTotalComp, maxTotalComp, experienceYears, page, limit } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {};
 
     if (company) {
-      where.company = {
-        name: { contains: company, mode: "insensitive" },
-      };
+      where.company = { contains: company, mode: "insensitive" };
     }
 
-    if (jobTitle) {
-      where.jobTitle = { contains: jobTitle, mode: "insensitive" };
+    if (role) {
+      where.role = { contains: role, mode: "insensitive" };
     }
 
     if (location) {
       where.location = { contains: location, mode: "insensitive" };
     }
 
-    if (minBaseSalary || maxBaseSalary) {
-      where.baseSalary = {};
-      if (minBaseSalary) where.baseSalary.gte = minBaseSalary;
-      if (maxBaseSalary) where.baseSalary.lte = maxBaseSalary;
+    if (minTotalComp || maxTotalComp) {
+      where.totalCompensation = {};
+      if (minTotalComp) where.totalCompensation.gte = minTotalComp;
+      if (maxTotalComp) where.totalCompensation.lte = maxTotalComp;
     }
 
-    if (yearsExperience !== undefined) {
-      where.yearsExperience = { gte: yearsExperience };
+    if (experienceYears !== undefined) {
+      where.experienceYears = { gte: experienceYears };
     }
 
     const [salaries, total] = await Promise.all([
       prisma.salary.findMany({
         where,
-        include: { company: true },
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
@@ -54,22 +51,14 @@ export class SalaryService {
     };
   }
 
-  static async getStats() {
-    const stats = await prisma.salary.aggregate({
-      _avg: {
-        baseSalary: true,
-      },
-      _count: {
-        id: true,
-      },
-      _min: {
-        baseSalary: true,
-      },
-      _max: {
-        baseSalary: true,
+  static async createSalary(data: any) {
+    const totalCompensation = data.baseSalary + (data.bonus || 0) + (data.stock || 0);
+    
+    return prisma.salary.create({
+      data: {
+        ...data,
+        totalCompensation,
       },
     });
-
-    return stats;
   }
 }
