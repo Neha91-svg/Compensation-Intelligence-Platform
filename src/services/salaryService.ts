@@ -53,6 +53,23 @@ export class SalaryService {
 
   static async createSalary(data: any) {
     const totalCompensation = data.baseSalary + (data.bonus || 0) + (data.stock || 0);
+
+    // Reject duplicates: Check if same entry exists within the last hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const existingEntry = await prisma.salary.findFirst({
+      where: {
+        company: data.company,
+        role: data.role,
+        level: data.level,
+        location: data.location,
+        totalCompensation: totalCompensation,
+        createdAt: { gte: oneHourAgo },
+      },
+    });
+
+    if (existingEntry) {
+      throw new Error("Duplicate entry detected. Please wait before submitting again.");
+    }
     
     return prisma.salary.create({
       data: {

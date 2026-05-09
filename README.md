@@ -68,6 +68,28 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## 📡 API Endpoints
+
+### `GET /api/salaries`
+Retrieve compensation data with server-side filtering.
+- **Query Params**: `company`, `role`, `location`, `minTotalComp`, `maxTotalComp`, `experienceYears`, `page`, `limit`
+
+### `POST /api/ingest-salary`
+Submit new compensation data.
+- **Features**: Automatic normalization, total compensation calculation, and duplicate rejection.
+- **Body**:
+  ```json
+  {
+    "company": "Google",
+    "role": "Software Engineer",
+    "location": "Mountain View, CA",
+    "experienceYears": 2,
+    "baseSalary": 150000,
+    "bonus": 20000,
+    "stock": 40000
+  }
+  ```
+
 ## 📊 Database Schema
 
 The core `Salary` model includes:
