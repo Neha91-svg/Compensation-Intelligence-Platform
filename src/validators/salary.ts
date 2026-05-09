@@ -4,7 +4,7 @@ import { z } from "zod";
  * Normalizes company names for consistency
  * Trims whitespace and ensures consistent casing
  */
-const normalizeCompanyName = (val: string) => 
+export const normalizeCompanyName = (val: string) => 
   val.trim().split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');

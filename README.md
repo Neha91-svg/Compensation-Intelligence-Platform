@@ -93,6 +93,11 @@ Submit new compensation data.
   }
   ```
 
+### `GET /api/company/[company]`
+Retrieve aggregated insights for a specific company.
+- **Returns**: Median compensation, level distribution, and recent salary listings.
+- **Normalization**: Automatically matches normalized company names regardless of URL casing.
+
 ## 📊 Database Schema
 
 The core `Salary` model includes:

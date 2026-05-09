@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { SalaryQuery } from "@/validators/salary";
+import { SalaryQuery, normalizeCompanyName } from "@/validators/salary";
 
 export class SalaryService {
   static async getSalaries(query: any) {
@@ -89,5 +89,57 @@ export class SalaryService {
         totalCompensation,
       },
     });
+  }
+
+  static async getCompanyData(companyName: string) {
+    const normalizedName = normalizeCompanyName(companyName);
+
+    const [salaries, levelDist] = await Promise.all([
+      prisma.salary.findMany({
+        where: {
+          company: { equals: normalizedName, mode: "insensitive" },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.salary.groupBy({
+        by: ['level'],
+        where: {
+          company: { equals: normalizedName, mode: "insensitive" },
+        },
+        _count: {
+          id: true,
+        },
+        _avg: {
+          totalCompensation: true,
+        },
+      }),
+    ]);
+
+    if (salaries.length === 0) return null;
+
+    // Calculate median compensation
+    const sortedComp = salaries
+      .map(s => s.totalCompensation)
+      .sort((a, b) => a - b);
+    
+    const mid = Math.floor(sortedComp.length / 2);
+    const medianComp = sortedComp.length % 2 !== 0 
+      ? sortedComp[mid] 
+      : (sortedComp[mid - 1] + sortedComp[mid]) / 2;
+
+    return {
+      company: salaries[0].company,
+      stats: {
+        count: salaries.length,
+        medianCompensation: medianComp,
+        averageCompensation: sortedComp.reduce((a, b) => a + b, 0) / sortedComp.length,
+      },
+      levelDistribution: levelDist.map(d => ({
+        level: d.level || "Unknown",
+        count: d._count.id,
+        averageComp: d._avg.totalCompensation,
+      })),
+      recentSalaries: salaries.slice(0, 10),
+    };
   }
 }
