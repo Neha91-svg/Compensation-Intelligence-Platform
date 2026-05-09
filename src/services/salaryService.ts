@@ -142,4 +142,52 @@ export class SalaryService {
       recentSalaries: salaries.slice(0, 10),
     };
   }
+
+  static async compareSalaries(id1: string, id2: string) {
+    const [s1, s2] = await Promise.all([
+      prisma.salary.findUnique({ where: { id: id1 } }),
+      prisma.salary.findUnique({ where: { id: id2 } }),
+    ]);
+
+    if (!s1 || !s2) {
+      throw new Error("One or both salary entries not found.");
+    }
+
+    const calculateDiff = (v1: number, v2: number) => ({
+      absolute: v2 - v1,
+      percentage: v1 !== 0 ? ((v2 - v1) / v1) * 100 : (v2 !== 0 ? 100 : 0),
+    });
+
+    return {
+      entry1: {
+        company: s1.company,
+        role: s1.role,
+        level: s1.level,
+        baseSalary: s1.baseSalary,
+        bonus: s1.bonus,
+        stock: s1.stock,
+        totalCompensation: s1.totalCompensation,
+      },
+      entry2: {
+        company: s2.company,
+        role: s2.role,
+        level: s2.level,
+        baseSalary: s2.baseSalary,
+        bonus: s2.bonus,
+        stock: s2.stock,
+        totalCompensation: s2.totalCompensation,
+      },
+      differences: {
+        baseSalary: calculateDiff(s1.baseSalary, s2.baseSalary),
+        bonus: calculateDiff(s1.bonus, s2.bonus),
+        stock: calculateDiff(s1.stock, s2.stock),
+        totalCompensation: calculateDiff(s1.totalCompensation, s2.totalCompensation),
+      },
+      levelComparison: {
+        level1: s1.level,
+        level2: s2.level,
+        isSame: s1.level === s2.level,
+      }
+    };
+  }
 }

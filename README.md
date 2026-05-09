@@ -98,6 +98,11 @@ Retrieve aggregated insights for a specific company.
 - **Returns**: Median compensation, level distribution, and recent salary listings.
 - **Normalization**: Automatically matches normalized company names regardless of URL casing.
 
+### `GET /api/compare`
+Perform a head-to-head comparison between two salary entries.
+- **Query Params**: `id1`, `id2` (IDs of the entries to compare)
+- **Returns**: Absolute and percentage differences across all financial metrics, plus level comparisons.
+
 ## 📊 Database Schema
 
 The core `Salary` model includes:
