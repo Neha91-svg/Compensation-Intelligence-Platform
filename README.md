@@ -18,7 +18,8 @@ CompLens is a full-stack, production-grade compensation intelligence platform in
 - **API-First Design**: Robust API endpoints with server-side filtering and pagination.
 - **Modern UI/UX**: Premium, responsive dashboard with a clean aesthetic.
 - **Advanced Filtering**: Filter by company, role, location, total compensation, and experience.
-- **Data Integrity**: Integrated Zod validation for all data entry and queries.
+- **Robust Validation**: Zod-powered validation with automatic string normalization, trimming, and strict range checks.
+- **Structured Error Handling**: API returns detailed, field-specific validation errors.
 - **Production Grade**: Structured for scalability and maintainability.
 
 ## 📁 Project Structure
